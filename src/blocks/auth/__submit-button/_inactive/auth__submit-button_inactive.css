@@ -1,6 +1,6 @@
 .auth__submit-button_inactive {
-  background-color: white;
-  border: 1px solid #000000;
-  color: #000000;
-  opacity: .2;
+  background: none;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  cursor: default;
 }

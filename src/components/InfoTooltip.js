@@ -1,6 +1,6 @@
 import React from "react";
 
-export function AttentionPopup({ name, isOpen, title, src, onClose }) {
+export function InfoTooltip({ name, isOpen, title, src, alt, onClose }) {
   return (
     <div
       className={`pop-up ${isOpen ? "pop-up_opened" : ""}`}
@@ -13,8 +13,10 @@ export function AttentionPopup({ name, isOpen, title, src, onClose }) {
           className="pop-up__close-button"
           onClick={onClose}
         ></button>
-        <img className="pop-up__image" src={src} />
-        <h3 className="pop-up__title">{title}</h3>
+        <div className="pop-up__attention">
+          <img className="pop-up__icon" src={src} alt={alt} />
+          <h3 className="pop-up__title pop-up__title_attention">{title}</h3>
+        </div>
       </div>
     </div>
   );

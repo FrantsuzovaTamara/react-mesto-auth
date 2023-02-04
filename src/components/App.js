@@ -1,4 +1,5 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Header from "./Header.js";
 import Main from "./Main.js";
@@ -9,11 +10,12 @@ import EditProfilePopup from "./EditProfilePopup.js";
 import EditAvatarPupup from "./EditAvatarPopup.js";
 import AddPlacePopup from "./AddPlacePopup.js";
 import ConfirmationPopup from "./ConfirmationPopup.js";
-import { SuccessPopup } from "./SuccessPopup.js";
-import { FailPopup } from "./FailPopup.js";
+import { SuccessInfoTooltip } from "./SuccessInfoTooltip.js";
+import { FailInfoTooltip } from "./FailInfoTooltip.js";
 
-import { LogIn } from "./LogIn.js";
-import { SignUp } from "./SignUp.js";
+import { Login } from "./Login.js";
+import { Register } from "./Register.js";
+import ProtectedRoute from "./ProtectedRoute.js";
 
 import api from "../utils/Api.js";
 
@@ -24,7 +26,9 @@ function App() {
   const [cards, setCards] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState({});
-  const [deletedCard, setDeletedCard] = useState({})
+  const [deletedCard, setDeletedCard] = useState({});
+
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const [isSelectedCardPopupOpen, setIsSelectedCardPopupOpen] = useState(false);
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -33,7 +37,6 @@ function App() {
   const [isConfirmationPopupOpen, setIsConfirmationPopupOpen] = useState(false);
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
   const [isFailPopupOpen, setIsFailPopupOpen] = useState(false);
-  
 
   useEffect(() => {
     Promise.all([api.getUserInfo(), api.getCards()])
@@ -44,7 +47,7 @@ function App() {
       .catch((err) => {
         console.log(err);
       });
-  }, [])
+  }, []);
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen);
@@ -77,10 +80,13 @@ function App() {
   }
 
   function handleCardLike(card) {
-    const isLiked = card.likes.some(i => i._id === currentUser._id);
-    api.changeLikeCardStatus(card._id, !isLiked)
+    const isLiked = card.likes.some((i) => i._id === currentUser._id);
+    api
+      .changeLikeCardStatus(card._id, !isLiked)
       .then((newCard) => {
-        setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
+        setCards((state) =>
+          state.map((c) => (c._id === card._id ? newCard : c))
+        );
       })
       .catch((err) => {
         console.log(err);
@@ -88,7 +94,8 @@ function App() {
   }
 
   function handleCardDelete() {
-    api.deleteCardInApi(deletedCard._id)
+    api
+      .deleteCardInApi(deletedCard._id)
       .then((res) => {
         console.log(res);
         closeAllPopUps();
@@ -96,12 +103,13 @@ function App() {
       })
       .catch((err) => {
         console.log(err);
-      })
+      });
   }
 
   function handleUpdateUser(userData) {
     setIsLoading(true);
-    api.editProfileInfo(userData)
+    api
+      .editProfileInfo(userData)
       .then((data) => {
         setCurrentUser(data);
         closeAllPopUps();
@@ -111,12 +119,13 @@ function App() {
       })
       .finally(() => {
         setIsLoading(false);
-      })
+      });
   }
 
   function handleUpdateAvatar(avatar) {
     setIsLoading(true);
-    api.editAvatar(avatar)
+    api
+      .editAvatar(avatar)
       .then((data) => {
         setCurrentUser(data);
         closeAllPopUps();
@@ -126,12 +135,13 @@ function App() {
       })
       .finally(() => {
         setIsLoading(false);
-      })
+      });
   }
 
   function handleAddPlaceSubmit(place) {
     setIsLoading(true);
-    api.addCardInApi(place)
+    api
+      .addCardInApi(place)
       .then((newCard) => {
         setCards([newCard, ...cards]);
         closeAllPopUps();
@@ -141,7 +151,7 @@ function App() {
       })
       .finally(() => {
         setIsLoading(false);
-      })
+      });
   }
 
   return (
@@ -149,29 +159,38 @@ function App() {
       <CurrentUserContext.Provider value={currentUser}>
         <Header />
 
-        <LogIn />
-        <SignUp />
-        
-        <Main
-          cards={cards}
-          onEditAvatar={handleEditAvatarClick}
-          onAddPlace={handleAddPlaceClick}
-          onEditProfile={handleEditProfileClick}
-          onCardClick={handleCardClick}
-          onCardLike={handleCardLike}
-          onCardDelete={handleDeleteButtonClick}
-        />
+        <Routes>
+          <Route path="/" element={loggedIn ? <Navigate to="/my-profile" replace /> : <Navigate to="/sign-in" replace />} />
+          <Route path="/sign-in" element={<Login />} />
+          <Route path="/sign-up" element={<Register />} />
+          <Route
+            path="/my-profile"
+            element={
+              <ProtectedRoute 
+                element={<Main
+                  cards={cards}
+                  onEditAvatar={handleEditAvatarClick}
+                  onAddPlace={handleAddPlaceClick}
+                  onEditProfile={handleEditProfileClick}
+                  onCardClick={handleCardClick}
+                  onCardLike={handleCardLike}
+                  onCardDelete={handleDeleteButtonClick}
+                />} 
+                loggedIn={loggedIn}/>
+            }
+          />
+        </Routes>
 
         <Footer />
 
-        <EditAvatarPupup 
+        <EditAvatarPupup
           isOpen={isEditAvatarPopupOpen}
           onClose={closeAllPopUps}
           onUpdateAvatar={handleUpdateAvatar}
           isLoading={isLoading}
-        />        
+        />
 
-        <EditProfilePopup 
+        <EditProfilePopup
           isOpen={isEditProfilePopupOpen}
           onClose={closeAllPopUps}
           onUpdateUser={handleUpdateUser}
@@ -185,27 +204,21 @@ function App() {
           isLoading={isLoading}
         />
 
-        <ConfirmationPopup 
+        <ConfirmationPopup
           isOpen={isConfirmationPopupOpen}
           onClose={closeAllPopUps}
           onConfirm={handleCardDelete}
         />
 
-        <ImagePopUp 
-          card={selectedCard} 
-          isOpen={isSelectedCardPopupOpen} 
-          onClose={closeAllPopUps} 
-        />
-
-        <SuccessPopup
-          isOpen={isSuccessPopupOpen}
+        <ImagePopUp
+          card={selectedCard}
+          isOpen={isSelectedCardPopupOpen}
           onClose={closeAllPopUps}
         />
 
-        <FailPopup
-          isOpen={isFailPopupOpen}
-          onClose={closeAllPopUps}
-        />
+        <SuccessInfoTooltip isOpen={isSuccessPopupOpen} onClose={closeAllPopUps} />
+
+        <FailInfoTooltip isOpen={isFailPopupOpen} onClose={closeAllPopUps} />
       </CurrentUserContext.Provider>
     </>
   );
