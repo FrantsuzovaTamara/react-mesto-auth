@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 import Header from "./Header.js";
 import Main from "./Main.js";
@@ -18,6 +18,7 @@ import { Register } from "./Register.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 
 import api from "../utils/Api.js";
+import * as Auth from "./Auth";
 
 import { CurrentUserContext } from "../context/CurrentUserContext.js";
 
@@ -38,6 +39,8 @@ function App() {
   const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
   const [isFailPopupOpen, setIsFailPopupOpen] = useState(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     Promise.all([api.getUserInfo(), api.getCards()])
       .then(([userData, cards]) => {
@@ -48,6 +51,14 @@ function App() {
         console.log(err);
       });
   }, []);
+
+  function handleSuccessRegistration() {
+    setIsSuccessPopupOpen(!isSuccessPopupOpen);
+  }
+
+  function handleFailRegistration() {
+    setIsFailPopupOpen(!isFailPopupOpen);
+  }
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen);
@@ -77,6 +88,8 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setIsSelectedCardPopupOpen(false);
     setIsConfirmationPopupOpen(false);
+    setIsSuccessPopupOpen(false);
+    setIsFailPopupOpen(false);
   }
 
   function handleCardLike(card) {
@@ -154,29 +167,72 @@ function App() {
       });
   }
 
+  function handleLogin() {
+    setLoggedIn(true);
+  }
+
+  useEffect(() => {
+    handleTokenCheck();
+  }, []);
+
+  function handleTokenCheck() {
+    if (localStorage.getItem("jwt")) {
+      const jwt = localStorage.getItem("jwt");
+      Auth.checkToken(jwt).then((res) => {
+        if (res) {
+          setLoggedIn(true);
+          navigate("/my-profile", { replace: true });
+        }
+      });
+    }
+  }
+
   return (
     <>
       <CurrentUserContext.Provider value={currentUser}>
-        <Header />
+        <Header loggedIn={loggedIn} />
 
         <Routes>
-          <Route path="/" element={loggedIn ? <Navigate to="/my-profile" replace /> : <Navigate to="/sign-in" replace />} />
-          <Route path="/sign-in" element={<Login />} />
-          <Route path="/sign-up" element={<Register />} />
+          <Route
+            path="/"
+            element={
+              loggedIn ? (
+                <Navigate to="/my-profile" replace />
+              ) : (
+                <Navigate to="/sign-in" replace />
+              )
+            }
+          />
+          <Route
+            path="/sign-in"
+            element={<Login handleLogin={handleLogin} />}
+          />
+          <Route
+            path="/sign-up"
+            element={
+              <Register
+                success={handleSuccessRegistration}
+                fail={handleFailRegistration}
+              />
+            }
+          />
           <Route
             path="/my-profile"
             element={
-              <ProtectedRoute 
-                element={<Main
-                  cards={cards}
-                  onEditAvatar={handleEditAvatarClick}
-                  onAddPlace={handleAddPlaceClick}
-                  onEditProfile={handleEditProfileClick}
-                  onCardClick={handleCardClick}
-                  onCardLike={handleCardLike}
-                  onCardDelete={handleDeleteButtonClick}
-                />} 
-                loggedIn={loggedIn}/>
+              <ProtectedRoute
+                element={
+                  <Main
+                    cards={cards}
+                    onEditAvatar={handleEditAvatarClick}
+                    onAddPlace={handleAddPlaceClick}
+                    onEditProfile={handleEditProfileClick}
+                    onCardClick={handleCardClick}
+                    onCardLike={handleCardLike}
+                    onCardDelete={handleDeleteButtonClick}
+                  />
+                }
+                loggedIn={loggedIn}
+              />
             }
           />
         </Routes>
@@ -216,7 +272,10 @@ function App() {
           onClose={closeAllPopUps}
         />
 
-        <SuccessInfoTooltip isOpen={isSuccessPopupOpen} onClose={closeAllPopUps} />
+        <SuccessInfoTooltip
+          isOpen={isSuccessPopupOpen}
+          onClose={closeAllPopUps}
+        />
 
         <FailInfoTooltip isOpen={isFailPopupOpen} onClose={closeAllPopUps} />
       </CurrentUserContext.Provider>

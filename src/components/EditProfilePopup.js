@@ -23,12 +23,12 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser, isLoading }) {
 
   function handleChangeName(e) {
     setName(e.target.value);
-    handleChange(e)
+    handleChange(e, "pop-up__form")
   }
 
   function handleChangeDescription(e) {
     setDescription(e.target.value);
-    handleChange(e)
+    handleChange(e, "pop-up__form")
   }
 
   function handleSubmit(evt) {

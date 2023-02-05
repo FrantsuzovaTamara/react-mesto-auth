@@ -4,11 +4,11 @@ function FormValidator() {
     const [errors, setErrors] = useState({});
     const [isValid, setIsValid] = useState(false);
   
-    const handleChange = (event) => {
+    function handleChange(event, formClass) {
       const target = event.target;
       const name = target.name;
       setErrors({...errors, [name]: target.validationMessage });
-      setIsValid(target.closest(".pop-up__form").checkValidity());
+      setIsValid(target.closest(formClass).checkValidity());
     };
   
     const resetForm = useCallback(

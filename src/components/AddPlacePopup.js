@@ -21,7 +21,7 @@ function AddPlacePopup({ isOpen, onClose, onAddCard, isLoading }) {
 
   function handleChangeCardName(e) {
     setCardName(e.target.value);
-    handleChange(e);
+    handleChange(e, ".pop-up__form");
   }
 
   function handleChangeCardLink(e) {

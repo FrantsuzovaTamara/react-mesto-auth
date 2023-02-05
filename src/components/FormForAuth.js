@@ -13,13 +13,12 @@ export function FormForAuth({
   const {
     errors,
     isValid,
-    handleChange,
-    resetForm
+    handleChange
   } = FormValidator({});
 
   const handleChangeValue = (e) => {
     const {name, value} = e.target;
-    handleChange(e);
+    handleChange(e, ".auth__form");
 
     setFormValues({
       ...formValues,
@@ -29,7 +28,6 @@ export function FormForAuth({
 
   function submitForm(e) {
     e.preventDefault();
-    resetForm();
     onSubmit(formValues);
   }
 
@@ -44,7 +42,7 @@ export function FormForAuth({
             name="email"
             className={`auth__input ${errors.email ? "auth__input_type_error" : ""}`}
             placeholder="E-mail"
-            /* value={name || ""} */
+            value={formValues.email || ""}
             onChange={handleChangeValue}
             required
           />
@@ -67,7 +65,7 @@ export function FormForAuth({
             maxLength="30"
             className={`auth__input ${errors.password ? "auth__input_type_error" : ""}`}
             placeholder="Пароль"
-            /* value={name || ""} */
+            value={formValues.password || ""}
             onChange={handleChangeValue}
             required
           />

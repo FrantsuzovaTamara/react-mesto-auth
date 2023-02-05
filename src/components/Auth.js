@@ -1,9 +1,33 @@
-import React from "react";
-
 export const BASE_URL = 'https://auth.nomoreparties.co';
 
-export const register = (email, password) => {
+export const register = (password, email, fail, success) => {
+  console.log(password, email)
   return fetch(`${BASE_URL}/signup`, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({password, email})
+  })
+  .then((response) => {
+    console.log(response)
+    if (response.status = 200) {
+      success();
+    } else {
+      fail();
+    }
+    return response.json();
+  })
+  .then((res) => {
+    return res;
+  })
+  .catch((err) => console.log(err));
+};
+
+export const authorize = (email, password) => {
+  console.log(password, email)
+  return fetch(`${BASE_URL}/signin`, {
     method: 'POST',
     headers: {
       'Accept': 'application/json',
@@ -11,17 +35,29 @@ export const register = (email, password) => {
     },
     body: JSON.stringify({email, password})
   })
-  .then((response) => {
-    try {
-      if (response.status === 200){
-        return response.json();
-      }
-    } catch(e){
-      return (e)
+  .then((response => {
+    console.log(response)
+    response.json()
+  }))
+  .then((data) => {
+    if (data.user){
+      localStorage.setItem('jwt', data.jwt);
+      return data;
     }
   })
-  .then((res) => {
-    return res;
-  })
-  .catch((err) => console.log(err));
+  .catch(err => console.log(err))
 };
+
+export const checkToken = (token) => {
+  console.log(token)
+  return fetch(`${BASE_URL}/users/me`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    }
+  })
+  .then(res => res.json())
+  .then(data => data)
+}
