@@ -11,6 +11,10 @@
 @import url(./blocks/header/__link/_exit/header__link_exit.css);
 @import url(./blocks/header/__link/_inactive/header__link_inactive.css);
 @import url(./blocks/header/__menu/header__menu.css);
+@import url(./blocks/header/__menu/_opened/header__menu_opened.css);
+
+@import url(./blocks/menu/menu.css);
+@import url(./blocks/menu/_opened/menu_opened.css);
 
 @import url(./blocks/profile/profile.css);
 @import url(./blocks/profile/__main-info/profile__main-info.css);

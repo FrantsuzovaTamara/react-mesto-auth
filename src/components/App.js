@@ -194,13 +194,11 @@ function App() {
   }
 
   function handleTokenCheck() {
-    console.log(localStorage.getItem("jwt"))
     if (localStorage.getItem("jwt")) {
       const jwt = JSON.parse(localStorage.getItem("jwt"));
       Auth.checkToken(jwt).then((res) => {
         console.log(res);
         if (res) {
-          console.log(res)
           setUserData({
             email: res.data.email
           });
@@ -214,7 +212,7 @@ function App() {
   return (
     <>
       <CurrentUserContext.Provider value={currentUser}>
-        <Header loggedIn={loggedIn} email={userData.email} />
+        <Header loggedIn={loggedIn} email={userData.email} setLoggedIn={setLoggedIn} />
 
         <Routes>
           <Route
