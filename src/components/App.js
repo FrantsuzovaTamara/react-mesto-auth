@@ -29,6 +29,8 @@ function App() {
   const [selectedCard, setSelectedCard] = useState({});
   const [deletedCard, setDeletedCard] = useState({});
 
+  const [userData, setUserData] = useState({});
+
   const [loggedIn, setLoggedIn] = useState(false);
 
   const [isSelectedCardPopupOpen, setIsSelectedCardPopupOpen] = useState(false);
@@ -40,6 +42,11 @@ function App() {
   const [isFailPopupOpen, setIsFailPopupOpen] = useState(false);
 
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    handleTokenCheck();
+    console.log(loggedIn)
+  }, []);
 
   useEffect(() => {
     Promise.all([api.getUserInfo(), api.getCards()])
@@ -167,19 +174,36 @@ function App() {
       });
   }
 
-  function handleLogin() {
-    setLoggedIn(true);
+  function handleLogin({ email, password }) {
+    return Auth.authorize(email, password).then((data) => {
+      console.log(data.token)
+      localStorage.setItem("jwt", JSON.stringify(data.token));
+      setLoggedIn(true);
+      setUserData({
+        email: email,
+        password: password,
+      });
+      navigate("/my-profile");
+    });
   }
 
-  useEffect(() => {
-    handleTokenCheck();
-  }, []);
+  function handleRegister({ password, email }) {
+    return Auth.register(password, email).then(() => {
+      navigate("/sign-in");
+    });
+  }
 
   function handleTokenCheck() {
+    console.log(localStorage.getItem("jwt"))
     if (localStorage.getItem("jwt")) {
-      const jwt = localStorage.getItem("jwt");
+      const jwt = JSON.parse(localStorage.getItem("jwt"));
       Auth.checkToken(jwt).then((res) => {
+        console.log(res);
         if (res) {
+          console.log(res)
+          setUserData({
+            email: res.data.email
+          });
           setLoggedIn(true);
           navigate("/my-profile", { replace: true });
         }
@@ -190,7 +214,7 @@ function App() {
   return (
     <>
       <CurrentUserContext.Provider value={currentUser}>
-        <Header loggedIn={loggedIn} />
+        <Header loggedIn={loggedIn} email={userData.email} />
 
         <Routes>
           <Route
@@ -211,6 +235,7 @@ function App() {
             path="/sign-up"
             element={
               <Register
+                handleRegister={handleRegister}
                 success={handleSuccessRegistration}
                 fail={handleFailRegistration}
               />
@@ -220,18 +245,15 @@ function App() {
             path="/my-profile"
             element={
               <ProtectedRoute
-                element={
-                  <Main
-                    cards={cards}
-                    onEditAvatar={handleEditAvatarClick}
-                    onAddPlace={handleAddPlaceClick}
-                    onEditProfile={handleEditProfileClick}
-                    onCardClick={handleCardClick}
-                    onCardLike={handleCardLike}
-                    onCardDelete={handleDeleteButtonClick}
-                  />
-                }
+                component={Main}
                 loggedIn={loggedIn}
+                cards={cards}
+                onEditAvatar={handleEditAvatarClick}
+                onAddPlace={handleAddPlaceClick}
+                onEditProfile={handleEditProfileClick}
+                onCardClick={handleCardClick}
+                onCardLike={handleCardLike}
+                onCardDelete={handleDeleteButtonClick}
               />
             }
           />

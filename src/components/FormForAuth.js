@@ -37,7 +37,7 @@ export function FormForAuth({
         <h3 className="auth__title">{title}</h3>
         <label className="auth__field">
           <input
-            id="e-mail"
+            id="email"
             type="email"
             name="email"
             className={`auth__input ${errors.email ? "auth__input_type_error" : ""}`}

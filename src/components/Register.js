@@ -1,24 +1,22 @@
 import React from "react";
 import { FormForAuth } from "./FormForAuth";
-import { Link, useNavigate } from "react-router-dom";
-import * as Auth from "./Auth";
+import { Link } from "react-router-dom";
 
-export function Register({success, fail}) {
+export function Register({handleRegister, success, fail}) {
   function handleSubmit(formValue) {
-    Auth.register(formValue.password, formValue.email, fail, success)
-    .then((res) => {
-      navigate('/sign-in', {replace: true});
+    handleRegister({password: formValue.password, email: formValue.email})
+    .then(() => {
+      success();
     })
     .catch(err => {
-      console.log(err);
+      console.log(err)
+      fail();
     });
   }
-  
-  const navigate = useNavigate();
 
   return (
     <FormForAuth name="register" title="Регистрация" submit="Зарегистрироваться" onSubmit={handleSubmit}>
-      <Link to="/login" className="auth__link">
+      <Link to="/sign-in" className="auth__link">
           Уже зарегистрированы? Войти
       </Link>
     </FormForAuth>
