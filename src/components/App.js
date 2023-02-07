@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
+import fail from "../images/pop-up__fail.svg";
+import success from "../images/pop-up__success.svg";
+
 import Header from "./Header.js";
 import Main from "./Main.js";
 import Footer from "./Footer.js";
@@ -10,15 +13,14 @@ import EditProfilePopup from "./EditProfilePopup.js";
 import EditAvatarPupup from "./EditAvatarPopup.js";
 import AddPlacePopup from "./AddPlacePopup.js";
 import ConfirmationPopup from "./ConfirmationPopup.js";
-import { SuccessInfoTooltip } from "./SuccessInfoTooltip.js";
-import { FailInfoTooltip } from "./FailInfoTooltip.js";
+import { InfoTooltip } from "./InfoTooltip";
 
 import { Login } from "./Login.js";
 import { Register } from "./Register.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 
 import api from "../utils/Api.js";
-import * as Auth from "./Auth";
+import * as Auth from "../utils/Auth";
 
 import { CurrentUserContext } from "../context/CurrentUserContext.js";
 
@@ -38,33 +40,32 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [isConfirmationPopupOpen, setIsConfirmationPopupOpen] = useState(false);
-  const [isSuccessPopupOpen, setIsSuccessPopupOpen] = useState(false);
-  const [isFailPopupOpen, setIsFailPopupOpen] = useState(false);
+  const [isInfoToolOpen, setIsInfoToolOpen] = useState(false);
+
+  const [infoToolData, setInfoToolData] = useState({});
 
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     handleTokenCheck();
-    console.log(loggedIn)
   }, []);
 
   useEffect(() => {
-    Promise.all([api.getUserInfo(), api.getCards()])
-      .then(([userData, cards]) => {
-        setCurrentUser(userData);
-        setCards(cards);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+    if (loggedIn) {
+      Promise.all([api.getUserInfo(), api.getCards()])
+        .then(([userData, cards]) => {
+          setCurrentUser(userData);
+          setCards(cards);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }, [loggedIn]);
 
-  function handleSuccessRegistration() {
-    setIsSuccessPopupOpen(!isSuccessPopupOpen);
-  }
-
-  function handleFailRegistration() {
-    setIsFailPopupOpen(!isFailPopupOpen);
+  function handleOpenInfoTool(data) {
+    setInfoToolData(data);
+    setIsInfoToolOpen(!isInfoToolOpen);
   }
 
   function handleEditAvatarClick() {
@@ -95,8 +96,7 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setIsSelectedCardPopupOpen(false);
     setIsConfirmationPopupOpen(false);
-    setIsSuccessPopupOpen(false);
-    setIsFailPopupOpen(false);
+    setIsInfoToolOpen(false);
   }
 
   function handleCardLike(card) {
@@ -117,7 +117,6 @@ function App() {
     api
       .deleteCardInApi(deletedCard._id)
       .then((res) => {
-        console.log(res);
         closeAllPopUps();
         setCards(cards.filter((c) => c._id !== deletedCard._id));
       })
@@ -175,44 +174,82 @@ function App() {
   }
 
   function handleLogin({ email, password }) {
-    return Auth.authorize(email, password).then((data) => {
-      console.log(data.token)
-      localStorage.setItem("jwt", JSON.stringify(data.token));
-      setLoggedIn(true);
-      setUserData({
-        email: email,
-        password: password,
+    return Auth.authorize(email, password)
+      .then((data) => {
+        localStorage.setItem("jwt", JSON.stringify(data.token));
+        setLoggedIn(true);
+        setUserData({
+          email: email,
+          password: password,
+        });
+        navigate("/my-profile");
+      })
+      .catch((err) => {
+        console.log(err);
+        handleOpenInfoTool({
+          src: fail,
+          alt: "Ошибка",
+          name: "fail",
+          title: "Что-то пошло не так! Попробуйте ещё раз.",
+        });
       });
-      navigate("/my-profile");
-    });
   }
 
   function handleRegister({ password, email }) {
-    return Auth.register(password, email).then(() => {
-      navigate("/sign-in");
-    });
+    return Auth.register(password, email)
+      .then(() => {
+        handleOpenInfoTool({
+          src: success,
+          alt: "Успешно",
+          name: "fail",
+          title: "Вы успешно зарегистрировались!",
+        });
+        navigate("/sign-in");
+      })
+      .catch((err) => {
+        console.log(err);
+        handleOpenInfoTool({
+          src: fail,
+          alt: "Ошибка",
+          name: "fail",
+          title: "Что-то пошло не так! Попробуйте ещё раз.",
+        });
+      });
   }
 
   function handleTokenCheck() {
-    if (localStorage.getItem("jwt")) {
-      const jwt = JSON.parse(localStorage.getItem("jwt"));
-      Auth.checkToken(jwt).then((res) => {
-        console.log(res);
+    const jwt = JSON.parse(localStorage.getItem("jwt"));
+    if (jwt) {
+      Auth.checkToken(jwt)
+      .then((res) => {
         if (res) {
           setUserData({
-            email: res.data.email
+            email: res.data.email,
           });
           setLoggedIn(true);
           navigate("/my-profile", { replace: true });
         }
+      })
+      .catch((err) => {
+        console.log(err);
       });
     }
+  }
+
+  function signOut() {
+    localStorage.removeItem("jwt");
+    setUserData({
+      email: "",
+      password: "",
+    });
+    setLoggedIn(false);
+    navigate("/sign-in", { replace: true });
   }
 
   return (
     <>
       <CurrentUserContext.Provider value={currentUser}>
-        <Header loggedIn={loggedIn} email={userData.email} setLoggedIn={setLoggedIn} />
+        <Header loggedIn={loggedIn} email={userData.email} signOut={signOut} />
 
         <Routes>
           <Route
@@ -231,13 +268,7 @@ function App() {
           />
           <Route
             path="/sign-up"
-            element={
-              <Register
-                handleRegister={handleRegister}
-                success={handleSuccessRegistration}
-                fail={handleFailRegistration}
-              />
-            }
+            element={<Register handleRegister={handleRegister} />}
           />
           <Route
             path="/my-profile"
@@ -292,12 +323,11 @@ function App() {
           onClose={closeAllPopUps}
         />
 
-        <SuccessInfoTooltip
-          isOpen={isSuccessPopupOpen}
+        <InfoTooltip
+          data={infoToolData}
+          isOpen={isInfoToolOpen}
           onClose={closeAllPopUps}
         />
-
-        <FailInfoTooltip isOpen={isFailPopupOpen} onClose={closeAllPopUps} />
       </CurrentUserContext.Provider>
     </>
   );

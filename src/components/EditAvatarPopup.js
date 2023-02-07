@@ -12,6 +12,10 @@ function EditAvatarPupup({ isOpen, onClose, onUpdateAvatar, isLoading }) {
     onUpdateAvatar({ avatar: avatar.current.value });
   }
 
+  function handleChangeAvatar(e) {
+    handleChange(e, ".pop-up__form");
+  }
+
   const {
     errors,
     isValid,
@@ -41,7 +45,7 @@ function EditAvatarPupup({ isOpen, onClose, onUpdateAvatar, isLoading }) {
           type="url"
           name="avatar"
           className={`pop-up__input${errors.avatar ? ' pop-up__input_type_error' : ''}`}
-          onChange={handleChange}
+          onChange={handleChangeAvatar}
           placeholder="Ссылка на картинку"
           required
         />

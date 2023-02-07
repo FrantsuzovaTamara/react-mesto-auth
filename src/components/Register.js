@@ -2,16 +2,9 @@ import React from "react";
 import { FormForAuth } from "./FormForAuth";
 import { Link } from "react-router-dom";
 
-export function Register({handleRegister, success, fail}) {
+export function Register({handleRegister}) {
   function handleSubmit(formValue) {
-    handleRegister({password: formValue.password, email: formValue.email})
-    .then(() => {
-      success();
-    })
-    .catch(err => {
-      console.log(err)
-      fail();
-    });
+    handleRegister({password: formValue.password, email: formValue.email});
   }
 
   return (

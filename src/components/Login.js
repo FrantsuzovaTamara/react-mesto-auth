@@ -4,9 +4,7 @@ import { FormForAuth } from "./FormForAuth";
 export function Login({handleLogin}) {
 
   function handleSubmit(formValue) {
-    console.log(formValue)
-    handleLogin({email: formValue.email, password: formValue.password})
-    .catch(err => console.log(err));
+    handleLogin({email: formValue.email, password: formValue.password});
   }
 
   return (

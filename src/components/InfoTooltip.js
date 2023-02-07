@@ -1,10 +1,10 @@
 import React from "react";
 
-export function InfoTooltip({ name, isOpen, title, src, alt, onClose }) {
+export function InfoTooltip({ data, isOpen, onClose }) {
   return (
     <div
       className={`pop-up ${isOpen ? "pop-up_opened" : ""}`}
-      id={`pop-up_${name}`}
+      id={`pop-up_${data.name}`}
     >
       <div className="pop-up__content">
         <button
@@ -14,8 +14,8 @@ export function InfoTooltip({ name, isOpen, title, src, alt, onClose }) {
           onClick={onClose}
         ></button>
         <div className="pop-up__attention">
-          <img className="pop-up__icon" src={src} alt={alt} />
-          <h3 className="pop-up__title pop-up__title_attention">{title}</h3>
+          <img className="pop-up__icon" src={data.src} alt={data.alt} />
+          <h3 className="pop-up__title pop-up__title_attention">{data.title}</h3>
         </div>
       </div>
     </div>
