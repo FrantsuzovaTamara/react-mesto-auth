@@ -49,7 +49,7 @@
 * Create React App
 * Хуки и классовые элементы
 * JSX
-* NPM
+* Webpack
 * Api
 
 ## **Как запустить?**
