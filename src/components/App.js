@@ -182,7 +182,7 @@ function App() {
           email: email,
           password: password,
         });
-        navigate("/my-profile");
+        navigate("/react-mesto-auth/my-profile");
       })
       .catch((err) => {
         console.log(err);
@@ -204,7 +204,7 @@ function App() {
           name: "fail",
           title: "Вы успешно зарегистрировались!",
         });
-        navigate("/sign-in");
+        navigate("/react-mesto-auth/sign-in");
       })
       .catch((err) => {
         console.log(err);
@@ -227,7 +227,7 @@ function App() {
             email: res.data.email,
           });
           setLoggedIn(true);
-          navigate("/my-profile", { replace: true });
+          navigate("/react-mesto-auth/my-profile", { replace: true });
         }
       })
       .catch((err) => {
@@ -243,7 +243,7 @@ function App() {
       password: "",
     });
     setLoggedIn(false);
-    navigate("/sign-in", { replace: true });
+    navigate("/react-mesto-auth/sign-in", { replace: true });
   }
 
   return (
@@ -253,25 +253,25 @@ function App() {
 
         <Routes>
           <Route
-            path="/"
+            path="/react-mesto-auth/"
             element={
               loggedIn ? (
-                <Navigate to="/my-profile" replace />
+                <Navigate to="/react-mesto-auth/my-profile" replace />
               ) : (
-                <Navigate to="/sign-in" replace />
+                <Navigate to="/react-mesto-auth/sign-in" replace />
               )
             }
           />
           <Route
-            path="/sign-in"
+            path="/react-mesto-auth/sign-in"
             element={<Login handleLogin={handleLogin} />}
           />
           <Route
-            path="/sign-up"
+            path="/react-mesto-auth/sign-up"
             element={<Register handleRegister={handleRegister} />}
           />
           <Route
-            path="/my-profile"
+            path="/react-mesto-auth/my-profile"
             element={
               <ProtectedRoute
                 component={Main}
