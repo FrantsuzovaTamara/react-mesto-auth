@@ -35,6 +35,11 @@
 * менять аватар профиля
 ![Смена аватара](./src/images/redme/redme__change-avatar.png)
 
+* регистрироваться, авторизовываться (при повторном входе авторизация не нужна) и выходить из профиля
+![Регистрация](./src/images/redme/readme__sign-up.png)
+![Авторизация](./src/images/redme/readne__sign-in.png)
+![Выход](./src/images/redme/readme__sign-out.gif)
+
 ## **Что использовалось?**
 
 * HTML
@@ -44,6 +49,7 @@
 * Create React App
 * Хуки и классовые элементы
 * JSX
+* NPM
 * Api
 
 ## **Как запустить?**
